@@ -4,13 +4,8 @@ use surrealdb::Surreal;
 
 use crate::models::User;
 
-
 pub async fn create_user(user: web::Json<User>, db: web::Data<Surreal<Client>>) -> impl Responder {
-    let created: Option<User> = db
-        .create("user")
-        .content(user.into_inner())
-        .await
-        .unwrap();
+    let created: Option<User> = db.create("user").content(user.into_inner()).await.unwrap();
 
     HttpResponse::Ok().json(created)
 }
