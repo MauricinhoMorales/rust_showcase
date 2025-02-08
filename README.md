@@ -50,8 +50,8 @@ or download the appropriate binary for your operating system from the [SurrealDB
 ### 3. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/rust-surrealdb-api.git
-cd rust-surrealdb-api
+git clone https://github.com/CodeCultist/hsr-calculator-rust.git
+cd hsr-calculator-rust
 ```
 
 Run the project:
