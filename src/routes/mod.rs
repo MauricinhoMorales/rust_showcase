@@ -1,16 +1,29 @@
 use actix_web::{web, HttpResponse, Responder};
-use surrealdb::engine::remote::ws::Client;
-use surrealdb::Surreal;
+use actix_web_httpauth::middleware::HttpAuthentication;
+use auth::login;
+use users::{get_users, register_user};
 
-use crate::models::User;
+use crate::auth::validator;
 
-pub async fn create_user(user: web::Json<User>, db: web::Data<Surreal<Client>>) -> impl Responder {
-    let created: Option<User> = db.create("user").content(user.into_inner()).await.unwrap();
+pub mod auth;
+pub mod users;
 
-    HttpResponse::Ok().json(created)
+async fn protected(user_id: web::ReqData<String>) -> impl Responder {
+    HttpResponse::Ok().body(format!("Authorized {}!", user_id.into_inner()))
 }
 
-pub async fn get_users(db: web::Data<Surreal<Client>>) -> impl Responder {
-    let users: Vec<User> = db.select("user").await.unwrap();
-    HttpResponse::Ok().json(users)
+pub fn init_routes(cfg: &mut web::ServiceConfig) {
+    let auth = HttpAuthentication::bearer(validator);
+
+    cfg.service(
+        web::scope("/api")
+            .route("/users", web::post().to(register_user))
+            .route("/users", web::get().to(get_users))
+            .route("/login", web::post().to(login))
+            .service(
+                web::scope("/protected")
+                    .wrap(auth)
+                    .route("", web::get().to(protected)),
+            ),
+    );
 }
